@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>ardrone_controller</name>
+  <version>1.0.0</version>
+  <description>
+    The ardrone_control package implements a position feedback control for the Ar.Drone.
+    Either PID, Trajectory_PID or Linear Controllers are Implemented.
+  </description>
+  <maintainer email="sebascuri@gmail.com">sebascuri</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>ardrone_autonomy</build_depend>
+  <build_depend>rostest</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>ardrone_autonomy</run_depend>
+
+  <export>
+  </export>
+
+</package>

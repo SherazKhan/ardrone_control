@@ -1,0 +1,5 @@
+<launch>
+  <!--node pkg="mypkg" type="mynode" name="mynode" /-->
+  <!--param name="string"  value="mystring" /-->
+  <test test-name="test_ardrone_trajectory_generator" pkg="ardrone_trajectory_generator" type="test_ardrone_trajectory_generator.py" />
+</launch>

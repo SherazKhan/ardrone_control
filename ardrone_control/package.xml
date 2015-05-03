@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>ardrone_control</name>
+  <version>1.0.0</version>
+  <description>
+    The ardrone_control package is a metapackage that holds different modules for controlling and simulating the Ar.Drone.
+    The ardrone_controller is a closed loop position feedback controller node.
+    The ardrone_sensor_fusion implements a sensor_fusion_algorithm.
+    The ardrone_trajectory_generator commands the desired position of the drone.
+    The ardrone_simulator is a bare-bones simulator that simulates the identified Ar.Drone system without any GUI.
+    The ardrone_lib is a package that has parameters and common modules used by other packages.
+    The ardrone_msgs defines the messages used in this metapackage.
+  </description>
+  <maintainer email="sebascuri@gmail.com">Sebastian</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>ardrone_controller</run_depend>
+  <run_depend>ardrone_sensor_fusion</run_depend>
+  <run_depend>ardrone_trajectory_generator</run_depend>
+  <run_depend>ardrone_simulator</run_depend>
+  <run_depend>ardrone_lib</run_depend>
+  <run_depend>ardrone_msgs</run_depend>
+  <export>
+    <metapackage/>
+  </export>
+</package>

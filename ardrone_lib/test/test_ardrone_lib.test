@@ -1,0 +1,9 @@
+<launch>
+  <!--node pkg="mypkg" type="mynode" name="mynode" /-->
+  <!--param name="string"  value="mystring" /-->
+  <test test-name="test_controllers" pkg="ardrone_lib" type="test_controllers.py" />
+  <test test-name="test_filters" pkg="ardrone_lib" type="test_filters.py" />
+  <test test-name="test_quadrotor" pkg="ardrone_lib" type="test_quadrotor.py" />
+  <test test-name="test_quaternion" pkg="ardrone_lib" type="test_quaternion.py" />
+  <test test-name="test_sensors" pkg="ardrone_lib" type="test_sensors.py" />
+</launch>

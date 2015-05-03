@@ -1,0 +1,48 @@
+accelerometer: #mg
+    max: 8
+    min: -8
+    cross_coupling: 0.0
+    bias: 0.0
+    noise: 0.0
+
+magnetometer: #muT
+    max: 1229
+    min: -1229
+    cross_coupling: 0.0
+    bias: 000.0
+    noise: 0.00
+
+gyroscope: #rad/s
+    max: 500
+    min: -500
+    cross_coupling: 0.0
+    bias: 0.0
+    noise: 0.00
+
+altimeter: #m
+    max: 6.00
+    min: 0.25
+    cross_coupling: 0.0
+    bias: 0.00
+    noise: 0.00
+
+gps: #m
+    max: +180
+    min: -180
+    cross_coupling: 0.0
+    bias: 0.
+    noise: 0.0
+
+velocity: #m/s
+    max: +5
+    min: -5
+    cross_coupling: 0.00
+    bias: 0.0
+    noise: 0.0
+
+marg:
+    max: +1.
+    min: -1.
+    cross_coupling: 0.0
+    bias: 0.0
+    noise: 0.0

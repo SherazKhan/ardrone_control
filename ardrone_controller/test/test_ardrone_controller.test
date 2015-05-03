@@ -1,0 +1,5 @@
+<launch>
+  <!--node pkg="mypkg" type="mynode" name="mynode" /-->
+  <!--param name="string"  value="mystring" /-->
+  <test test-name="test_ardrone_controller" pkg="ardrone_controller" type="test_ardrone_controller.py" />
+</launch>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package>
+  <name>ardrone_simulator</name>
+  <version>1.0.0</version>
+  <description>
+    The ardrone_simulator package simulates a Parrot Ar.Drone.
+    It implements the identified transfer functions of the system,
+    including an uncertainty model.
+    The sensors are simulated considering bias drift, noise (Gaussian) and axis cross-coupling.
+    The implemented sensors are:
+      - Altimeter
+      - Gyroscope
+      - Magnetometer
+      - Accelerometer
+      - GPS
+      - Velocity Estimation (From Ar.Drone on-board)
+      - Orientation Estimation (From Ar.Drone on-board)
+  </description>
+  <maintainer email="sebascuri@gmail.com">sebascuri</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>ardrone_autonomy</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>rostest</build_depend>
+
+  <run_depend>ardrone_autonomy</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+
+  <export>
+  </export>
+</package>

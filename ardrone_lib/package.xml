@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>ardrone_lib</name>
+  <version>1.0.0</version>
+  <description>
+    The ardrone_lib package contains common python modules used accross different packages.
+    It also contains parameters used in different packages.
+  </description>
+  <maintainer email="sebascuri@gmail.com">sebascuri</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rostest</build_depend>
+
+  <export>
+  </export>
+</package>

@@ -1,0 +1,9 @@
+publish_time: 0.05
+sim_time: 0.001
+delay: 0.30
+euler_angle_max: 0.21
+control_vz_max: 0.7
+control_yaw: 1.75
+
+altitude_max: 300
+altitude_min: 50
