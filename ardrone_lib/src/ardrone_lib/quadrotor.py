@@ -11,9 +11,7 @@ Methods:
     global_to_local_rotation
         rotates global vector
 """
-
-from numpy import array, dot
-from math import sin, cos, atan2
+import numpy
 import ardrone_lib.quaternion as quaternion
 import tf
 UNKOWN = 'Unkown'
@@ -42,40 +40,32 @@ STATUS = [
 BATTERY_LIFE = 12*60 #12 minutes
 
 class Quadrotor(object):
-    """
-    State Class for a Quadrotor
-    """
+    """State Class for a Quadrotor"""
     def __init__(self, name):
         super(Quadrotor, self).__init__()
         self._name = name
-        self._global_position = array([0., 0., 0.]) #x, y, z
-        self._local_velocity = array([0., 0., 0., 0., 0., 0.]) #vx, vy, vz, wx, wy, wz
-        self._rotation = array([0., 0., 0.]) #roll, pitch, yaw
+        self._global_position = numpy.zeros((1, 3))[0]
+        self._local_velocity = numpy.zeros((1, 6))[0] #vx, vy, vz, wx, wy, wz
+        self._rotation = numpy.zeros((1, 3))[0] #roll, pitch, yaw
         self._quaternion = quaternion.Quaternion(0., 0., 0., 1.) #qx, qy, qz, qw
         #self._local_to_global = array([[1., 0.], [0., 1.]])
         self._status = 0
         self._battery = 0.0
 
     def global_to_local_rotation(self, vector):
-        """
-        Return matrix to transform a global vector into a local vector
-        """
+        """Return matrix to transform a global vector into a local vector"""
         roll, pitch, yaw = self._rotation
         global_to_local = tf.transformations.euler_matrix(roll, pitch, yaw).T
-        return dot(global_to_local[0:3, 0:3], vector)
+        return numpy.dot(global_to_local[0:3, 0:3], vector)
 
     def local_to_global_rotation(self, vector):
-        """
-        Return matrix to transform a local vector into a global vector
-        """
+        """Return matrix to transform a local vector into a global vector"""
         roll, pitch, yaw = self._rotation
         local_to_global = tf.transformations.euler_matrix(roll, pitch, yaw)
-        return dot(local_to_global[0:3, 0:3], vector)
+        return numpy.dot(local_to_global[0:3, 0:3], vector)
 
     def odometric_prediction(self, delta_t):
-        """
-        given a delta_t calculate the next global position
-        """
+        """given a delta_t calculate the next global position"""
         if delta_t < 0:
             raise ValueError
         self._global_position += self.local_to_global_rotation(self._local_velocity[0:3]) * delta_t
@@ -94,130 +84,84 @@ class Quadrotor(object):
             self._battery -= 100.* delta_t / BATTERY_LIFE
 
     def get_name(self):
-        """
-        Get Quadrotor's name
-        """
+        """Get Quadrotor's name"""
         return self._name
 
     def set_position(self, pos_x, pos_y, pos_z=0.):
-        """
-        Set Quadrotor's global position
-        """
+        """Set Quadrotor's global position"""
         self._global_position[0] = pos_x
         self._global_position[1] = pos_y
         self._global_position[2] = pos_z
 
     def get_position(self):
-        """
-        Get Quadrotor's global position
-        """
+        """Get Quadrotor's global position"""
         return self._global_position
 
     def set_altitude(self, altitude):
-        """
-        Set Quadrotor's altitude
-        """
+        """Set Quadrotor's altitude"""
         self._global_position[2] = altitude
 
     def get_altitude(self):
-        """
-        Get Quadrotor's altitude
-        """
+        """Get Quadrotor's altitude"""
         return self._global_position[2]
 
     def set_velocity(self, vel_x, vel_y, vel_z=0., ):
-        """
-        Set Quadrotor's local velocity
-        """
+        """Set Quadrotor's local velocity"""
         self._local_velocity[0] = vel_x
         self._local_velocity[1] = vel_y
         self._local_velocity[2] = vel_z
 
     def set_omega(self, omega_x, omega_y, omega_z):
-        """
-        Set Quadrotor's local rotational velocity
-        """
+        """Set Quadrotor's local rotational velocity"""
         self._local_velocity[3] = omega_x
         self._local_velocity[4] = omega_y
         self._local_velocity[5] = omega_z
 
     def get_velocity(self):
-        """
-        Get Quadrotor's local velocity
-        """
+        """Get Quadrotor's local linear and angular velocity"""
         return self._local_velocity
 
     def set_heading(self, yaw):
-        """
-        Set Quadrotor's heading
-        """
-        self._rotation[2] = atan2(sin(yaw), cos(yaw))
+        """Set Quadrotor's heading"""
+        self._rotation[2] = numpy.arctan2(numpy.sin(yaw), numpy.cos(yaw))
         self._quaternion.set_euler(self._rotation[0], self._rotation[1], self._rotation[2])
 
     def get_heading(self):
-        """
-        Get Quadrotor's heading
-        """
+        """Get Quadrotor's heading"""
         return self._rotation[2]
 
     def set_rotation(self, roll, pitch, yaw):
-        """
-        Set Quadrotor's Orientation using
-        ROLL, PITCH, YAW convention
-        """
-        self._rotation[0] = atan2(sin(roll), cos(roll))
-        self._rotation[1] = atan2(sin(pitch), cos(pitch))
-        self._rotation[2] = atan2(sin(yaw), cos(yaw))
+        """Set Quadrotor's Orientation using ROLL, PITCH, YAW convention"""
+        self._rotation[0] = numpy.arctan2(numpy.sin(roll), numpy.cos(roll))
+        self._rotation[1] = numpy.arctan2(numpy.sin(pitch), numpy.cos(pitch))
+        self._rotation[2] = numpy.arctan2(numpy.sin(yaw), numpy.cos(yaw))
         self._quaternion.set_euler(self._rotation[0], self._rotation[1], self._rotation[2])
 
     def get_rotation(self):
-        """
-        Get Quadrotor's Orientation using
-        ROLL, PITCH, YAW convention
+        """Get Quadrotor's Orientation using ROLL, PITCH, YAW convention
         """
         return self._rotation
 
     def get_quaternion(self):
-        """
-        Get Quadrotor's Orientation in Quaternion form
-        """
+        """Get Quadrotor's Orientation in Quaternion form"""
         return self._quaternion
 
     def set_status(self, idx):
-        """
-        Set Quadrotor's Status
-        """
+        """Set Quadrotor's Status"""
         if idx not in range(len(STATUS)):
             raise IndexError
         self._status = idx
 
     def get_status(self):
-        """
-        Get Quadrotor's Status
-        """
+        """Get Quadrotor's Status"""
         return self._status
 
     def set_battery(self, battery):
-        """
-        Set Quadrotor battery
-        """
+        """Set Quadrotor battery"""
         if not 0 <= battery <= 100:
             raise ValueError
         self._battery = battery
 
     def get_battery(self):
-        """
-        Get Quadrotor battery
-        """
+        """Get Quadrotor battery"""
         return self._battery
-
-if __name__ == '__main__':
-    QUAD = Quadrotor('a')
-    print QUAD.get_name()
-    QUAD.set_velocity(1.0, 0.5, 0.1)
-    QUAD.set_omega(0.0, 0.0, 0.1)
-    for i in range(10):
-        QUAD.odometric_prediction(0.1)
-
-    print QUAD.get_position()
-    print QUAD.get_heading()

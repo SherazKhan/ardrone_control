@@ -3,8 +3,7 @@
 control algorithm for ardrone
 
 """
-from numpy import array, dot
-from math import cos, sin, atan2
+import numpy
 from ardrone_lib.filters import TransferFunction
 
 
@@ -40,10 +39,8 @@ class Controller(object):
         return self._saturated
 
     def set_saturated(self, is_saturated):
-        """
-        Set if Controller is saturating actuator
-        """
-        if type(is_saturated) is not bool:
+        """Set if Controller is saturating actuator"""
+        if isinstance(is_saturated, bool):
             raise TypeError
         self._saturated = is_saturated
 
@@ -53,7 +50,7 @@ class Controller(object):
 
     def set_periodic(self, is_periodic):
         """Set if position is periodic"""
-        if type(is_periodic) is not bool:
+        if isinstance(is_periodic, bool):
             raise TypeError
         self._periodic = is_periodic
 
@@ -61,7 +58,7 @@ class Controller(object):
         """calculate new error"""
         self._error = self._reference - self._input
         if self._periodic:
-            self._error = atan2(sin(self._error), cos(self._error))
+            self._error = numpy.arctan2(numpy.sin(self._error), numpy.cos(self._error))
 
 
 class PID(Controller):
@@ -75,8 +72,8 @@ class PID(Controller):
     LAMBDA = 0.1
     def __init__(self, Kp, Ki=0., Kd=0., Kd2=0.):
         super(PID, self).__init__()
-        self._gains = array([Ki, Kp, Kd, Kd2])
-        self._parallel_error = array([0., 0., 0., 0.])
+        self._gains = numpy.array([Ki, Kp, Kd, Kd2])
+        self._parallel_error = numpy.zeros((1, 4))
 
     def _calculate_error(self):
         """Calculate Controller Error"""
@@ -92,7 +89,7 @@ class PID(Controller):
 
     def _calculate_output(self):
         """Calculate Controller output"""
-        self._output = dot(self._gains, self._parallel_error)
+        self._output = numpy.dot(self._gains, self._parallel_error)
 
 class TrajectoryPID(PID):
     """
@@ -103,8 +100,8 @@ class TrajectoryPID(PID):
     ACCELERATION = 2
     def __init__(self, Kp, Ki=0., Kd=0., Kd2=1.):
         super(TrajectoryPID, self).__init__(Kp, Ki, Kd, Kd2)
-        self._trajectory_reference = array([0., 0., 0.])
-        self._trajectory_input = array([0., 0., 0.])
+        self._trajectory_reference = numpy.zeros((1, 3))
+        self._trajectory_input = numpy.zeros((1, 3))
 
     def _update_vector(self, vector, idx, new_value):
         """Updates vector values"""
@@ -147,7 +144,10 @@ class TrajectoryPID(PID):
 
 
 class Digital(Controller):
-    """docstring for Controller"""
+    """
+    Digital Controller:
+    args are num, den and optionally dt if needed to digitalize with a ZOH
+    """
     def __init__(self, num, den, dt=None):
         super(Digital, self).__init__()
         self._tf = TransferFunction(num, den, dt)

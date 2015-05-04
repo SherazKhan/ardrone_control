@@ -2,9 +2,9 @@
 """
 Various Filters Implementation
 """
-
 from collections import deque
-from scipy.signal import ss2tf, tf2ss, cont2discrete
+import scipy
+
 
 class Delay(object):
     """
@@ -19,15 +19,11 @@ class Delay(object):
         return 'delays: ' + str(len(self._input))
 
     def set_input(self, new_input):
-        """
-        Input a new value
-        """
+        """Input a new value"""
         self._input.append(new_input)
 
     def get_output(self):
-        """
-        Get the system output
-        """
+        """Get the system output"""
         return self._input[0]
 
 class TransferFunction(object):
@@ -38,9 +34,9 @@ class TransferFunction(object):
     def __init__(self, num, den, dt=None):
         super(TransferFunction, self).__init__()
         if dt is not None and len(den) > 1:
-            lti_sys = tf2ss(num, den)
-            a_k, b_k, c_k, d_k, dt = cont2discrete(lti_sys, dt)
-            num, den = ss2tf(a_k, b_k, c_k, d_k)
+            lti_sys = scipy.signal.tf2ss(num, den)
+            a_k, b_k, c_k, d_k, dt = scipy.signal.cont2discrete(lti_sys, dt)
+            num, den = scipy.signal.ss2tf(a_k, b_k, c_k, d_k)
             num = num.reshape(-1,).tolist()
             den = den.reshape(-1,).tolist()
         self._num = num
@@ -54,16 +50,12 @@ class TransferFunction(object):
         return len(self._den)
 
     def set_input(self, new_input):
-        """
-        Input a new value
-        """
+        """Input a new value"""
         self._input.append(new_input)
         self._calculate_output()
 
     def _calculate_output(self):
-        """
-        Calculate the system output
-        """
+        """Calculate the system output"""
         new_output = 0
         for idx in range(len(self._num)):
             new_output += self._num[idx] * self._input[idx]
@@ -72,9 +64,7 @@ class TransferFunction(object):
         self._output.append(new_output)
 
     def get_output(self):
-        """
-        Get the system output
-        """
+        """Get the system output"""
         return self._output[-1]
 
     def get_num(self):
@@ -95,16 +85,12 @@ class TransferFunctionWithDelay(object):
         self._delay = Delay(time_delays)
 
     def set_input(self, new_input):
-        """
-        Input a new value
-        """
+        """Input a new value"""
         self._delay.set_input(new_input)
         self._transfer_function.set_input(self._delay.get_output())
 
     def get_output(self):
-        """
-        Get the system output
-        """
+        """Get the system output"""
         return self._transfer_function.get_output()
 
 class LeakyIntegrator(object):
@@ -115,26 +101,11 @@ class LeakyIntegrator(object):
         self._output = 0.
 
     def set_input(self, new_input):
-        """
-        Set Controller input
-        """
+        """Set Controller input"""
         self._output *= self._lambda
         self._output += (1-self._lambda) * new_input
 
     def get_output(self):
-        """
-        Return Controller output
-        """
+        """Return Controller output"""
         return self._output
 
-def main():
-    """
-    debug
-    """
-    transfer_f = TransferFunction([2.], [1., 1.], 0.001)
-    print transfer_f
-    delay = Delay(10.5)
-    print delay
-
-if __name__ == '__main__':
-    main()
