@@ -40,8 +40,6 @@ class Controller(object):
 
     def set_saturated(self, is_saturated):
         """Set if Controller is saturating actuator"""
-        if isinstance(is_saturated, bool):
-            raise TypeError
         self._saturated = is_saturated
 
     def is_periodic(self):
@@ -50,8 +48,6 @@ class Controller(object):
 
     def set_periodic(self, is_periodic):
         """Set if position is periodic"""
-        if isinstance(is_periodic, bool):
-            raise TypeError
         self._periodic = is_periodic
 
     def _calculate_error(self):
@@ -73,7 +69,7 @@ class PID(Controller):
     def __init__(self, Kp, Ki=0., Kd=0., Kd2=0.):
         super(PID, self).__init__()
         self._gains = numpy.array([Ki, Kp, Kd, Kd2])
-        self._parallel_error = numpy.zeros((1, 4))
+        self._parallel_error = numpy.zeros((1, 4))[0]
 
     def _calculate_error(self):
         """Calculate Controller Error"""
@@ -100,8 +96,8 @@ class TrajectoryPID(PID):
     ACCELERATION = 2
     def __init__(self, Kp, Ki=0., Kd=0., Kd2=1.):
         super(TrajectoryPID, self).__init__(Kp, Ki, Kd, Kd2)
-        self._trajectory_reference = numpy.zeros((1, 3))
-        self._trajectory_input = numpy.zeros((1, 3))
+        self._trajectory_reference = numpy.zeros((1, 3))[0]
+        self._trajectory_input = numpy.zeros((1, 3))[0]
 
     def _update_vector(self, vector, idx, new_value):
         """Updates vector values"""

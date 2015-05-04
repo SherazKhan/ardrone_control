@@ -2,11 +2,10 @@
 """
 Test cases for Implemented Filters
 """
-PKG = 'test_ardrone_lib'
-
 import unittest
 from ardrone_lib import filters
-from scipy.signal import dstep, dimpulse
+import scipy.signal
+
 class TestFilters(unittest.TestCase):
     """docstring for ClassName"""
     def test_one_equals_one(self):
@@ -28,7 +27,8 @@ class TestFilters(unittest.TestCase):
         """Test step response of transfer function"""
         delta_t = 0.01
         transfer_function = filters.TransferFunction([1.0], [1.0, 5.0], delta_t)
-        time, output = dstep((transfer_function.get_num(), transfer_function.get_den(), delta_t))
+        time, output = scipy.signal.dstep((
+            transfer_function.get_num(), transfer_function.get_den(), delta_t))
         for idx in range(len(time)):
             self.assertAlmostEqual(output[0][idx], transfer_function.get_output())
             transfer_function.set_input(1.0)
@@ -36,7 +36,8 @@ class TestFilters(unittest.TestCase):
         """Test impulse response of transfer function"""
         delta_t = 0.01
         transfer_function = filters.TransferFunction([1.0], [1.0, 5.0], delta_t)
-        time, output = dimpulse((transfer_function.get_num(), transfer_function.get_den(), delta_t))
+        time, output = scipy.signal.dimpulse((
+            transfer_function.get_num(), transfer_function.get_den(), delta_t))
         for idx in range(len(time)):
             self.assertAlmostEqual(output[0][idx], transfer_function.get_output())
             transfer_function.set_input(1.0 if idx == 0 else 0.0)
@@ -72,6 +73,4 @@ class TestFilters(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    #import rostest
-    #rostest.rosrun(PKG, 'test_filters', TestFilters)
     unittest.main()

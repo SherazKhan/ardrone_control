@@ -3,7 +3,7 @@
 Various Filters Implementation
 """
 from collections import deque
-import scipy
+import scipy.signal
 
 
 class Delay(object):

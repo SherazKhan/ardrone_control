@@ -27,7 +27,7 @@ class Controller(object):
             'yaw': controllers.PID(0.8, 0., 2.0*delta_t)
         }
         for controller in self._controllers.values():
-            controller.set_saturated(True)
+            controller.set_saturated(False)
 
         self._publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10./delta_t)
         self._controlling = False

@@ -10,13 +10,12 @@ from std_msgs.msg import Empty
 from sensor_msgs.msg import Imu, NavSatFix, Range
 from ardrone_msgs.msg import QuadrotorState
 
-from numpy import array
+import numpy
 import tf
 
 import ardrone_lib.quadrotor as quadrotor
 import ardrone_lib.sensors as sensors
 import ardrone_lib.physics as physics
-import math
 
 Z_HIGH = 0.95
 Z_LOW = 0.3
@@ -169,7 +168,7 @@ class Simulator(object):
         self._sensors['accelerometer'].set_orientation(self._quadrotor.get_quaternion())
         self._sensors['magnetometer'].set_orientation(self._quadrotor.get_quaternion())
         self._sensors['gps'].set_position(self._quadrotor.get_position())
-        self._sensors['altimeter'].set_true_value(array([self._quadrotor.get_altitude()]))
+        self._sensors['altimeter'].set_true_value(numpy.array([self._quadrotor.get_altitude()]))
         self._sensors['marg'].set_true_value(self._quadrotor.get_quaternion().get_quaternion())
         self._sensors['velocity'].set_true_value(self._quadrotor.get_velocity()[0:2])
 
@@ -194,9 +193,9 @@ class Simulator(object):
         msg.altd = altitude[0] * 1000
         msg.vx = velocity[0] * 1000
         msg.vy = velocity[1] * 1000
-        msg.rotX = orientation[0] * 180 / math.pi
-        msg.rotY = orientation[1] * 180 / math.pi
-        msg.rotZ = orientation[2] * 180 / math.pi
+        msg.rotX = orientation[0] * 180 / numpy.pi
+        msg.rotY = orientation[1] * 180 / numpy.pi
+        msg.rotZ = orientation[2] * 180 / numpy.pi
         msg.batteryPercent = self._quadrotor.get_battery()
         msg.state = self._quadrotor.get_status()
 

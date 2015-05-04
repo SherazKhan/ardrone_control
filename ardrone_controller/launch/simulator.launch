@@ -10,5 +10,6 @@
     <node name="joystick" pkg="joy" type="joy_node" respawn="false" output="screen" />
     <node name="plotter_x" pkg="rqt_plot" type="rqt_plot" args="/ardrone/estimation/x /cmd_vel/linear/x" respawn="false" output="screen" />
     <node name="plotter_y" pkg="rqt_plot" type="rqt_plot" args="/ardrone/estimation/y /cmd_vel/linear/y" respawn="false" output="screen" />
+    <node name="plotter_z" pkg="rqt_plot" type="rqt_plot" args="/ardrone/estimation/z /cmd_vel/linear/z" respawn="false" output="screen" />
     <node name="plotter_yaw" pkg="rqt_plot" type="rqt_plot" args="/ardrone/estimation/yaw /cmd_vel/angular/z" respawn="false" output="screen" />
 </launch>

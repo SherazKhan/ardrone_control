@@ -95,7 +95,7 @@ class Accelerometer(Sensor, object):
         self._magnetic_dec = geomag.geomag.GeoMag()
         self._input = numpy.zeros((1, 2))[0]
 
-    def set_orientation(self, true_quat, body_acc=numpy.zeros((1, 3))):
+    def set_orientation(self, true_quat, body_acc=numpy.zeros((1, 3))[0]):
         """Project gravity into Body Axes"""
         acceleration = (true_quat
                         *quaternion.Quaternion(0., 0., self.GRAVITY, 0.)

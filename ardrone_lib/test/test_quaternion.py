@@ -2,12 +2,10 @@
 """
 Test cases for Quaternion Object
 """
-PKG = 'test_ardrone_lib'
-
 import unittest
 from ardrone_lib import quaternion
 import numpy.testing
-from numpy import array, exp
+#from numpy import array, exp
 
 class TestQuaternion(unittest.TestCase):
     """docstring for ClassName"""
@@ -56,11 +54,11 @@ class TestQuaternion(unittest.TestCase):
         self.assertEqual(self._random, other)
     def test_exponential(self):
         """test exponential of quaternion"""
-        self.assertTrue(self._unit.exponential() == quaternion.Quaternion(0., 0., 0., exp(1.)))
+        self.assertTrue(self._unit.exponential() == quaternion.Quaternion(0., 0., 0., numpy.exp(1.)))
     def test_exponentiate(self):
         """exponentiate the quaternion"""
         self._unit.exponentiate()
-        self.assertTrue(self._unit == quaternion.Quaternion(0., 0., 0., exp(1.)))
+        self.assertTrue(self._unit == quaternion.Quaternion(0., 0., 0., numpy.exp(1.)))
     def test_inverse(self):
         """test inverse quaternion"""
         self.assertEqual(self._random.inverse() * self._random, self._unit)
@@ -79,7 +77,7 @@ class TestQuaternion(unittest.TestCase):
         """test set_quaternion, get_quaternion methods"""
         self._random.set_quaternion(0.5, -2.0, 3.0, -0.93)
         numpy.testing.assert_array_almost_equal(
-            self._random.get_quaternion(), array([0.5, -2.0, 3.0, -0.93]))
+            self._random.get_quaternion(), numpy.array([0.5, -2.0, 3.0, -0.93]))
     def test_get_vector(self):
         """test get_vector"""
         numpy.testing.assert_array_almost_equal(
@@ -92,7 +90,7 @@ class TestQuaternion(unittest.TestCase):
         """test set_euler, get_euler methods"""
         self._random.set_euler(1.0, -1.0, 0.5)
         numpy.testing.assert_array_almost_equal(
-            self._random.get_euler(), array([1.0, -1.0, 0.5]))
+            self._random.get_euler(), numpy.array([1.0, -1.0, 0.5]))
     def test_update(self):
         """test the update of the quaternion"""
         self._unit.update(0, 0, 1, 1)
@@ -115,6 +113,4 @@ class TestQuaternion(unittest.TestCase):
         self.assertFalse(other is self._random)
 
 if __name__ == '__main__':
-    #import rostest
-    #rostest.rosrun(PKG, 'test_quaternion', TestQuaternion)
     unittest.main()
