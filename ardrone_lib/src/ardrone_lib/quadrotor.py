@@ -13,6 +13,7 @@ Methods:
 """
 
 from numpy import array, dot
+from math import sin, cos, atan2
 import ardrone_lib.quaternion as quaternion
 import tf
 UNKOWN = 'Unkown'
@@ -24,7 +25,6 @@ TEST = 'Test'
 TAKING_OFF = 'Taking Off'
 LANDING = 'Landing'
 LOOPING = 'Looping'
-
 
 STATUS = [
     UNKOWN,
@@ -76,6 +76,8 @@ class Quadrotor(object):
         """
         given a delta_t calculate the next global position
         """
+        if delta_t < 0:
+            raise ValueError
         self._global_position += self.local_to_global_rotation(self._local_velocity[0:3]) * delta_t
         omega_x, omega_y, omega_z = self._local_velocity[3:]
         self._quaternion.update(omega_x, omega_y, omega_z, delta_t)
@@ -83,6 +85,7 @@ class Quadrotor(object):
         self._rotation[0] = roll
         self._rotation[1] = pitch
         self._rotation[2] = yaw
+
         if self._status == STATUS.index(LANDED)\
         or self._status == STATUS.index(UNKOWN)\
         or self._status == STATUS.index(INITED):
@@ -148,7 +151,7 @@ class Quadrotor(object):
         """
         Set Quadrotor's heading
         """
-        self._rotation[2] = yaw
+        self._rotation[2] = atan2(sin(yaw), cos(yaw))
         self._quaternion.set_euler(self._rotation[0], self._rotation[1], self._rotation[2])
 
     def get_heading(self):
@@ -162,9 +165,9 @@ class Quadrotor(object):
         Set Quadrotor's Orientation using
         ROLL, PITCH, YAW convention
         """
-        self._rotation[0] = roll
-        self._rotation[1] = pitch
-        self._rotation[2] = yaw
+        self._rotation[0] = atan2(sin(roll), cos(roll))
+        self._rotation[1] = atan2(sin(pitch), cos(pitch))
+        self._rotation[2] = atan2(sin(yaw), cos(yaw))
         self._quaternion.set_euler(self._rotation[0], self._rotation[1], self._rotation[2])
 
     def get_rotation(self):
@@ -184,6 +187,8 @@ class Quadrotor(object):
         """
         Set Quadrotor's Status
         """
+        if idx not in range(len(STATUS)):
+            raise IndexError
         self._status = idx
 
     def get_status(self):
@@ -196,6 +201,8 @@ class Quadrotor(object):
         """
         Set Quadrotor battery
         """
+        if not 0 <= battery <= 100:
+            raise ValueError
         self._battery = battery
 
     def get_battery(self):

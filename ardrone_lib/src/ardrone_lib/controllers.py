@@ -22,47 +22,39 @@ class Controller(object):
         self._error = 0.0
 
     def set_reference(self, new_reference):
-        """
-        Set Controller reference
-        """
+        """Set Controller reference"""
         self._reference = new_reference
         self._calculate_error()
 
     def set_input(self, new_input):
-        """
-        Set Controller input
-        """
+        """Set Controller input"""
         self._input = new_input
         self._calculate_error()
 
     def get_output(self):
-        """
-        Return Controller output
-        """
+        """Return Controller output"""
         return self._output
 
     def is_saturated(self):
-        """
-        Check if Controller is saturating actuator
-        """
+        """Check if Controller is saturating actuator"""
         return self._saturated
 
     def set_saturated(self, is_saturated):
         """
         Set if Controller is saturating actuator
         """
+        if type(is_saturated) is not bool:
+            raise TypeError
         self._saturated = is_saturated
 
     def is_periodic(self):
-        """
-        Check if position is periodic
-        """
+        """Check if position is periodic"""
         return self._periodic
 
     def set_periodic(self, is_periodic):
-        """
-        Set if position is periodic
-        """
+        """Set if position is periodic"""
+        if type(is_periodic) is not bool:
+            raise TypeError
         self._periodic = is_periodic
 
     def _calculate_error(self):
@@ -87,9 +79,7 @@ class PID(Controller):
         self._parallel_error = array([0., 0., 0., 0.])
 
     def _calculate_error(self):
-        """
-        Calculate Controller Error
-        """
+        """Calculate Controller Error"""
         super(PID, self)._calculate_error()
         self._parallel_error[self.K_D] *= self.LAMBDA
         self._parallel_error[self.K_D] += (1-self.LAMBDA)\
@@ -101,9 +91,7 @@ class PID(Controller):
         self._calculate_output()
 
     def _calculate_output(self):
-        """
-        Calculate Controller output
-        """
+        """Calculate Controller output"""
         self._output = dot(self._gains, self._parallel_error)
 
 class TrajectoryPID(PID):
@@ -150,9 +138,7 @@ class TrajectoryPID(PID):
         self._update_vector(self._trajectory_input, self.ACCELERATION, acceleration)
 
     def _calculate_error(self):
-        """
-        Calculate Controller Error
-        """
+        """Calculate Controller Error"""
         self._parallel_error[self.K_P:(self.K_D2+1)] =\
             self._trajectory_reference - self._trajectory_input
         if not self._saturated:
@@ -162,23 +148,19 @@ class TrajectoryPID(PID):
 
 class Digital(Controller):
     """docstring for Controller"""
-    def __init__(self, num, den):
+    def __init__(self, num, den, dt=None):
         super(Digital, self).__init__()
-        self._tf = TransferFunction(num, den)
+        self._tf = TransferFunction(num, den, dt)
 
     def __len__(self):
         return len(self._tf)
 
     def _calculate_error(self):
-        """
-        Calculate Controller Error
-        """
+        """Calculate Controller Error"""
         super(Digital, self)._calculate_error()
         self._tf.set_input(self._error)
         self._calculate_output()
 
     def _calculate_output(self):
-        """
-        Calculate Controller output
-        """
+        """Calculate Controller output"""
         self._output = self._tf.get_output()

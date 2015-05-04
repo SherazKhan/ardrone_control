@@ -66,9 +66,9 @@ class TransferFunction(object):
         """
         new_output = 0
         for idx in range(len(self._num)):
-            new_output += self._num[idx] * self._input[-1 - idx]
-        for idx in range(len(self._den)):
-            new_output -= self._den[idx] * self._input[-1 - idx]
+            new_output += self._num[idx] * self._input[idx]
+        for idx in range(1, len(self._den)):
+            new_output -= self._den[idx] * self._output[idx]
         self._output.append(new_output)
 
     def get_output(self):
@@ -76,6 +76,14 @@ class TransferFunction(object):
         Get the system output
         """
         return self._output[-1]
+
+    def get_num(self):
+        """Return numerator"""
+        return self._num
+
+    def get_den(self):
+        """Return denominator"""
+        return self._den
 
 class TransferFunctionWithDelay(object):
     """

@@ -4,6 +4,7 @@ Sensor Implemenation for Simulator
 """
 import rospy
 import utm # GPS OBJECT
+import geomag #Magnetometer OBJECT
 from numpy import array, ones, identity, dot
 import ardrone_lib.quaternion as quaternion
 
@@ -52,6 +53,15 @@ class Sensor(object):
         Return sensor range
         """
         return self._range
+
+    def set_output(self):
+        """Set measured Output"""
+        pass
+
+    def get_input(self):
+        """Given a measured output,
+        return value that would measure_it"""
+        pass
 
 class Gyroscope(Sensor, object):
     """

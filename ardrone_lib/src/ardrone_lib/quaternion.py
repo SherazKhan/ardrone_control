@@ -3,7 +3,8 @@
 """
 Quaternion Module to handle orientation
 """
-from numpy import array, allclose
+from numpy import array, allclose, random, sin, cos, sqrt, pi, exp, append
+from numpy.linalg import norm
 import tf
 
 class Quaternion(object):
@@ -13,7 +14,7 @@ class Quaternion(object):
     def __init__(self, q_x=0., q_y=0., q_z=0., q_w=1.):
         super(Quaternion, self).__init__()
         self._quaternion = array([q_x, q_y, q_z, q_w])
-
+        #self.normalize()
     def __str__(self):
         return str(self._quaternion)
 
@@ -43,6 +44,24 @@ class Quaternion(object):
     def __eq__(self, other):
         return allclose(self.get_quaternion(), other.get_quaternion())
 
+    def exponential(self):
+        """Return the exponential of the quaternion"""
+        other = self.clone()
+        other.exponentiate()
+        return other
+
+    def exponentiate(self):
+        """Exponentiate the quaternion"""
+        vector = self.get_vector()
+        vector_norm = norm(vector)
+        scalar = self.get_scalar()
+        if vector_norm != 0:
+            new_vector = sin(vector_norm)/vector_norm * vector
+        else:
+            new_vector = vector
+        new_scalar = cos(vector_norm)
+        self._quaternion = exp(scalar)*append(new_vector, new_scalar)
+
     def conjugated(self):
         """
         Return conjugate Quaternion
@@ -65,6 +84,13 @@ class Quaternion(object):
         new_quaternion.invert()
         return new_quaternion
 
+    def is_null(self):
+        """Check if quaternion is null"""
+        ans = True
+        for number in self:
+            ans &= number == 0
+        return ans
+
     def invert(self):
         """
         Invert Quaternion
@@ -75,7 +101,8 @@ class Quaternion(object):
         """
         Normalize the quaternion to yield a unit quaternion
         """
-        self._quaternion = tf.transformations.unit_vector(self._quaternion)
+        if not self.is_null():
+            self._quaternion = self._quaternion/norm(self._quaternion)
 
     def jacobian(self, axis):
         """
@@ -138,11 +165,20 @@ class Quaternion(object):
         Update the current state of the quaternion
         Given angular velocities
         """
-        omega = Quaternion(omega_x, omega_y, omega_z, 0.)
+        omega = Quaternion(omega_x, omega_y, omega_z, 0.) * (delta_t*0.5)
+        omega.exponentiate()
+        omega.normalize()
+        self._quaternion = (omega * self).get_quaternion()
+        #self._quaternion = ((qdot * delta_t)+self).get_quaternion()
+        #self.normalize()
 
-        qdot = (self*omega)*0.5
-        self._quaternion = (self + qdot * delta_t).get_quaternion()
-        self.normalize()
+    def get_vector(self):
+        """Return vector part of quaternion"""
+        return self._quaternion[0:3]
+
+    def get_scalar(self):
+        """Return scalar part of quaternion"""
+        return self._quaternion[3]
 
     def clone(self):
         """
@@ -151,11 +187,23 @@ class Quaternion(object):
         q_x, q_y, q_z, q_w = self
         return Quaternion(q_x, q_y, q_z, q_w)
 
+def random_quaternion():
+    """Return uniform random unit quaternion."""
+    rand = random.rand(3)
+    r_1 = sqrt(1.0 - rand[0])
+    r_2 = sqrt(rand[0])
+    t_1 = 2.0 * pi * rand[1]
+    t_2 = 2.0 * pi * rand[2]
+    return Quaternion(sin(t_1)*r_1,
+                      cos(t_1)*r_1,
+                      sin(t_2)*r_2,
+                      cos(t_2)*r_2)
 
 def test():
     """
     testing
     """
+    print random_quaternion()
     q_1 = Quaternion(1., -2., 3., 4.)
     q_2 = Quaternion(-5., 6., 7., 8.)
     print q_1*q_2
