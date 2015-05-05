@@ -44,7 +44,6 @@ class Sensor(object):
         if (self._noise == numpy.zeros((1, self._dim))).all():
             output = self.get_output() + self._bias
         else:
-            print numpy.random.normal(self._bias, self._noise)
             output = self.get_output() + numpy.random.normal(self._bias, self._noise)[0]
         self._bias *= numpy.random.normal(1., 0.033, (1, len(self._bias)))[0]
         output += numpy.dot(self._cross_coupling, output)
@@ -215,3 +214,8 @@ class Altimeter(Sensor, object):
     """Sonar Altimeter Sensor simulated Class"""
     def __init__(self, sensor_data=None):
         super(Altimeter, self).__init__(1, sensor_data)
+
+if __name__ == '__main__':
+    from ardrone_lib.test.test_sensors import TestSensors
+    import unittest
+    unittest.main()

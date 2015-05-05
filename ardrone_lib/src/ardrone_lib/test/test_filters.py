@@ -71,6 +71,7 @@ class TestFilters(unittest.TestCase):
             t_f.set_input(1.0)
             self.assertAlmostEqual(tf_w_delay.get_output(), t_f.get_output())
 
-
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    PKG = 'test_ardrone_lib'
+    rostest.rosrun(PKG, 'test_filters', TestFilters)

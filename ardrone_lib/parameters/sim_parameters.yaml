@@ -1,5 +1,5 @@
 publish_time: 0.05
-sim_time: 0.001
+sim_time: 0.01
 delay: 0.30
 euler_angle_max: 0.21
 control_vz_max: 0.7

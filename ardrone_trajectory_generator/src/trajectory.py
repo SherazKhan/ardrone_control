@@ -19,11 +19,11 @@ WAY_POINTS = [
     {'x': 0, 'y':0, 'z': 1.5, 'yaw': 0},
     {'x': 0, 'y':1, 'z': 1, 'yaw': 0},
     {'x': 0, 'y':1, 'z': 1.5, 'yaw': 0},
-    {'x': 0, 'y':1, 'z': 1, 'yaw': math.pi},
-    {'x': 0, 'y':0, 'z': 1, 'yaw': math.pi},
+    {'x': 0, 'y':1, 'z': 1, 'yaw': math.pi/2},
+    {'x': 0, 'y':0, 'z': 1, 'yaw': -math.pi/2},
 ]
 
-THRESHOLD = 0.01
+THRESHOLD = 0.1
 WAYPOINT_HOLD_TIME = 1.0
 
 COMMAND = dict(
@@ -71,8 +71,6 @@ class WayPoints(object):
         if way_point is not None:
             for key, value in way_point.items():
                 self._error += abs(value - getattr(quad_state_msg, key))
-
-
         if self._error < THRESHOLD and not self._in_way_point:
             self._in_way_point = True
             self._timer = rospy.Timer(rospy.Duration(WAYPOINT_HOLD_TIME),
@@ -222,7 +220,7 @@ class TrajectoryCommander(object):
                 button = self._joystick['buttons'][idx]
                 try:
                     getattr(self, COMMAND[button])()
-                except KeyError:
+                except KeyError, IndexError:
                     pass
             idx += 1
 

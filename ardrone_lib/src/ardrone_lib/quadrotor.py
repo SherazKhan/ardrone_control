@@ -14,6 +14,7 @@ Methods:
 import numpy
 import ardrone_lib.quaternion as quaternion
 import tf
+
 UNKOWN = 'Unkown'
 INITED = 'Inited'
 LANDED = 'Landed'
@@ -76,6 +77,8 @@ class Quadrotor(object):
         self._rotation[1] = pitch
         self._rotation[2] = yaw
 
+    def update_battery(self, delta_t):
+        """update battery percentage"""
         if self._status == STATUS.index(LANDED)\
         or self._status == STATUS.index(UNKOWN)\
         or self._status == STATUS.index(INITED):
@@ -138,8 +141,7 @@ class Quadrotor(object):
         self._quaternion.set_euler(self._rotation[0], self._rotation[1], self._rotation[2])
 
     def get_rotation(self):
-        """Get Quadrotor's Orientation using ROLL, PITCH, YAW convention
-        """
+        """Get Quadrotor's Orientation using ROLL, PITCH, YAW convention"""
         return self._rotation
 
     def get_quaternion(self):
@@ -165,3 +167,8 @@ class Quadrotor(object):
     def get_battery(self):
         """Get Quadrotor battery"""
         return self._battery
+
+if __name__ == '__main__':
+    from ardrone_lib.test.test_quadrotor import TestQuadrotor
+    import unittest
+    unittest.main()

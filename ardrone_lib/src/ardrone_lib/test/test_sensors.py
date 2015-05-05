@@ -49,9 +49,9 @@ class TestSensors(unittest.TestCase):
             true_val = numpy.random.normal(0, 1., (1, self._dims[name]))[0]
             sensor.set_true_value(true_val)
             #numpy.testing.assert_array_almost_equal(true_val, sensor.get_output())
-            print sensor.get_output(), sensor.get_simulation()
+            #print sensor.get_output(), sensor.get_simulation()
 
 if __name__ == '__main__':
-    #import rostest
-    #rostest.rosrun(PKG, 'test_sensors', TestSensors)
-    unittest.main()
+    import rostest
+    PKG = 'test_ardrone_lib'
+    rostest.rosrun(PKG, 'test_sensors', TestSensors)

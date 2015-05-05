@@ -50,4 +50,6 @@ class TestControllers(unittest.TestCase):
             self.assertAlmostEqual(controller.get_output(), self._output[name])
 
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    PKG = 'test_ardrone_lib'
+    rostest.rosrun(PKG, 'test_controllers', TestControllers)

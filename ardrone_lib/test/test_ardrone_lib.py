@@ -3,10 +3,10 @@
 Test all modules
 """
 PKG = 'test_ardrone_lib'
-from test_controllers import TestControllers
-from test_quadrotor import TestQuadrotor
-from test_quaternion import TestQuaternion
-from test_filters import TestFilters
+from ardrone_lib.test.test_controllers import TestControllers
+from ardrone_lib.test.test_quadrotor import TestQuadrotor
+from ardrone_lib.test.test_quaternion import TestQuaternion
+from ardrone_lib.test.test_filters import TestFilters
 import rostest
 
 if __name__ == '__main__':

@@ -167,3 +167,8 @@ def random_quaternion():
                       numpy.cos(t_1)*r_1,
                       numpy.sin(t_2)*r_2,
                       numpy.cos(t_2)*r_2)
+
+if __name__ == '__main__':
+    from ardrone_lib.test.test_quaternion import TestQuaternion
+    import unittest
+    unittest.main()

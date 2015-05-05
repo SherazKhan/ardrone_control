@@ -1,6 +1,6 @@
 __all__ = ['controllers', 'filters', 'joysticks', 'physics',
-           'quadrotor', 'quaternion', 'sensors']
-
+           'quadrotor', 'quaternion', 'sensors', 'test']
+import ardrone_lib.test
 # import ardrone_lib.controllers
 # import ardrone_lib.filters
 # import ardrone_lib.joysticks

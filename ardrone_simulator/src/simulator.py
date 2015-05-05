@@ -13,15 +13,22 @@ from ardrone_msgs.msg import QuadrotorState
 import numpy
 import tf
 
-import ardrone_lib.quadrotor as quadrotor
-import ardrone_lib.sensors as sensors
-import ardrone_lib.physics as physics
+from ardrone_lib import quadrotor
+from ardrone_lib import sensors
+from ardrone_lib import physics
 
 Z_HIGH = 0.95
-Z_LOW = 0.3
-Z_VEL_LANDING = -0.5
-Z_VEL_TAKING_OFF = +0.5
+Z_LOW = 0.2
+#Z_VEL_LANDING = -0.5
+#Z_VEL_TAKING_OFF = +0.5
 SATURATION = 1.
+
+HOVERING_MSG = Twist()
+LANDING_MSG = Twist()
+LANDING_MSG.linear.z = -0.5
+TAKING_OFF_MSG = Twist()
+TAKING_OFF_MSG.linear.z = +0.5
+
 
 class Simulator(object):
     """docstring for Simulator"""
@@ -41,7 +48,8 @@ class Simulator(object):
         sim_time = rospy.get_param('sim_time')
         delay = rospy.get_param('delay')
 
-        self._physics = physics.QuadrotorPhysics(sim_time, delay)
+        self._cmd_vel = Twist()
+        self._physics = physics.ArDrone(sim_time, delay)
 
         self._quadrotor.set_battery(100.)
         self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.LANDED))
@@ -74,8 +82,7 @@ class Simulator(object):
         and quadrotor.STATUS[self._quadrotor.get_status()] != quadrotor.LANDING:
             rospy.loginfo('LANDING')
             self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.LANDING))
-            self._quadrotor.set_velocity(0., 0., Z_VEL_LANDING)
-            self._quadrotor.set_omega(0., 0., 0.)
+            self._cmd_vel = LANDING_MSG
 
     def takeoff(self, dummy_arg):
         """
@@ -84,8 +91,7 @@ class Simulator(object):
         if quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.LANDED:
             rospy.loginfo('TAKING_OFF')
             self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.TAKING_OFF))
-            self._quadrotor.set_velocity(0., 0., Z_VEL_TAKING_OFF)
-            self._quadrotor.set_omega(0., 0., 0.)
+            self._cmd_vel = TAKING_OFF_MSG
 
     def reset(self, dummy_arg):
         """
@@ -101,28 +107,34 @@ class Simulator(object):
         vel = [twist_msg.linear.x, twist_msg.linear.y, twist_msg.linear.z,
                twist_msg.angular.x, twist_msg.angular.y, twist_msg.angular.z]
 
-        vel = [SATURATION*v/abs(v) if abs(v) > SATURATION else v for v in vel]
-
+        #vel = [SATURATION*v/abs(v) if abs(v) > SATURATION else v for v in vel]
         if quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.FLYING:
-            self._quadrotor.set_velocity(vel[0], vel[1], vel[2])
-            self._quadrotor.set_omega(0, 0, vel[5])
+            self._cmd_vel = twist_msg
             if sum([x**2 for x in vel]) == 0:
                 self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.HOVERING))
+                self._cmd_vel = HOVERING_MSG
         elif quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.HOVERING:
             if sum([x**2 for x in vel]) == 0:
-                self._quadrotor.set_velocity(0., 0., 0.)
-                self._quadrotor.set_omega(0., 0., 0.)
+                self._cmd_vel = HOVERING_MSG
             else:
                 self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.FLYING))
+                self._cmd_vel = twist_msg
         elif quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.LANDING:
-            self._quadrotor.set_velocity(0., 0., Z_VEL_LANDING)
-            self._quadrotor.set_omega(0., 0., 0.)
+            self._cmd_vel = LANDING_MSG
         elif quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.TAKING_OFF:
-            self._quadrotor.set_velocity(0., 0., Z_VEL_TAKING_OFF)
-            self._quadrotor.set_omega(0., 0., 0.)
+            self._cmd_vel = TAKING_OFF_MSG
         else:
-            self._quadrotor.set_velocity(0., 0., 0.)
-            self._quadrotor.set_omega(0., 0., 0.)
+            self._cmd_vel = HOVERING_MSG
+
+    def _update_dynamics(self):
+        """Update the physics of the simulation"""
+        if quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.FLYING\
+        or quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.LANDING\
+        or quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.TAKING_OFF:
+            vel = self._physics.get_output()
+            self._quadrotor.set_velocity(vel[0], vel[1], vel[2])
+            self._quadrotor.set_omega(0., 0., vel[5])
+            self._physics.set_input(self._cmd_vel)
 
     def predict(self, time_event):
         """
@@ -132,19 +144,27 @@ class Simulator(object):
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0:
                 self._quadrotor.odometric_prediction(delta_t)
+                self._quadrotor.update_battery(delta_t)
+                self._update_dynamics()
 
 
         if self._quadrotor.get_altitude() >= Z_HIGH \
         and quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.TAKING_OFF:
             self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.HOVERING))
+            self._cmd_vel = HOVERING_MSG
             self._quadrotor.set_velocity(0., 0., 0.)
             self._quadrotor.set_omega(0., 0., 0.)
 
         if self._quadrotor.get_altitude() <= Z_LOW \
         and quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.LANDING:
             self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.LANDED))
+            #self._cmd_vel = HOVERING_MSG
             self._quadrotor.set_velocity(0., 0., 0.)
             self._quadrotor.set_omega(0., 0., 0.)
+
+        if self._quadrotor.get_battery() < 20:
+            self.land()
+            rospy.loginfo('No more battery')
 
     def publish(self, time_event):
         """

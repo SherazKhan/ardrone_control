@@ -83,6 +83,8 @@ class TransferFunctionWithDelay(object):
         super(TransferFunctionWithDelay, self).__init__()
         self._transfer_function = TransferFunction(num, den, dt)
         self._delay = Delay(time_delays)
+    def __str__(self):
+        return str(self._transfer_function) +' '+ str(self._delay)
 
     def set_input(self, new_input):
         """Input a new value"""
@@ -109,3 +111,7 @@ class LeakyIntegrator(object):
         """Return Controller output"""
         return self._output
 
+if __name__ == '__main__':
+    from ardrone_lib.test.test_filters import TestFilters
+    import unittest
+    unittest.main()

@@ -113,4 +113,6 @@ class TestQuaternion(unittest.TestCase):
         self.assertFalse(other is self._random)
 
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    PKG = 'test_ardrone_lib'
+    rostest.rosrun(PKG, 'test_quaternion', TestQuaternion)

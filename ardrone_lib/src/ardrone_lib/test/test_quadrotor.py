@@ -164,4 +164,6 @@ class TestQuadrotor(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    PKG = 'test_ardrone_lib'
+    rostest.rosrun(PKG, 'test_quadrotor', TestQuadrotor)

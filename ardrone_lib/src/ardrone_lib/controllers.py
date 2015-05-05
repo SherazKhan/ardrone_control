@@ -151,6 +151,9 @@ class Digital(Controller):
     def __len__(self):
         return len(self._tf)
 
+    def __str__(self):
+        return str(self._tf)
+
     def _calculate_error(self):
         """Calculate Controller Error"""
         super(Digital, self)._calculate_error()
@@ -160,3 +163,8 @@ class Digital(Controller):
     def _calculate_output(self):
         """Calculate Controller output"""
         self._output = self._tf.get_output()
+
+if __name__ == '__main__':
+    from ardrone_lib.test.test_controllers import TestControllers
+    import unittest
+    unittest.main()
