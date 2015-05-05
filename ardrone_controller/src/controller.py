@@ -33,7 +33,6 @@ class Controller(object):
         #     'z': controllers.Digital([1.03], [1.]),
         #     'yaw': controllers.Digital([0.8], [1.])
         # }
-        print delta_t
 
         for controller in self._controllers.values():
             controller.set_saturated(False)
