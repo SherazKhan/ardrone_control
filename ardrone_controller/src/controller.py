@@ -55,35 +55,24 @@ class Controller(object):
             getattr(controller, method)(getattr(msg, key))
 
     def recieve_estimation(self, msg):
-        """
-        Recieve State Estimation from sensor fusion node
-        Update Estimation locally
-        """
+        """Recieve State Estimation from sensor fusion node"""
         if self._controlling:
             self._recieve_state_msg(self._estimation, msg, 'set_input')
         self._estimation.set_status(msg.status)
 
     def recieve_reference(self, msg):
-        """
-        Recieve Reference from Trajectory Generator
-        Update Reference locally
-        """
+        """Recieve Reference from Trajectory Generator"""
         if self._controlling:
             self._recieve_state_msg(self._estimation, msg, 'set_reference')
 
     def recieve_closed_loop(self, msg_bool):
-        """
-        Recieve if publish commands or not
-        """
+        """Recieve if publish commands or not"""
         self._controlling = msg_bool
         for controller in self._controllers.values():
             controller.set_saturated(self._controlling)
 
     def control(self, time_event):
-        """
-        Publish previous control step
-        Calculate Errors and control output for Next Step
-        """
+        """Calculate Errors and control output for Next Step"""
         if time_event.last_real is not None:
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0 and self._controlling:
@@ -92,9 +81,7 @@ class Controller(object):
                 self.publish()
 
     def _check_saturation(self, msg):
-        """
-        Check if controller saturate and if so set them in saturation
-        """
+        """Check if controller saturate and if so set them in saturation"""
         if abs(msg.linear.x) > SATURATION:
             self._controllers['x'].set_saturated(True)
             msg.linear.x = SATURATION if msg.linear.x > 0 else -SATURATION
@@ -118,9 +105,7 @@ class Controller(object):
         return msg
 
     def publish(self):
-        """
-        Publish Twist Message
-        """
+        """Publish Twist Message"""
         msg = Twist()
         output = self._estimation.global_to_local_rotation(
             array([self._controllers['x'].get_output(),
