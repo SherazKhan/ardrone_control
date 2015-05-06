@@ -35,12 +35,12 @@ class SensorFusion(object):
         navdata.ax *= -1 # ax inverted
         navdata.az *= -1 # az inverted
 
-        self._quadrotor.set_velocity(navdata.vx / 1000.0, navdata.vy / 1000.0, 0)
+        self._quadrotor.set_velocity(2*navdata.vx / 1000.0, 2*navdata.vy / 1000.0, 0)
         self._quadrotor.set_heading(navdata.rotZ * math.pi / 180.0)
         self._quadrotor.set_altitude(navdata.altd / 1000.0)
         self._quadrotor.set_status(navdata.state)
         self._quadrotor.set_battery(navdata.batteryPercent)
-        self.publish()
+        #self.publish()
 
     def recieve_fix(self, fix):
         """
