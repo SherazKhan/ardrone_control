@@ -75,9 +75,7 @@ class Simulator(object):
         rospy.Timer(rospy.Duration(1.0), self._publish_fix)
 
     def land(self, dummy_arg):
-        """
-        Land Quadrotor
-        """
+        """Land Quadrotor"""
         if quadrotor.STATUS[self._quadrotor.get_status()] != quadrotor.LANDED\
         and quadrotor.STATUS[self._quadrotor.get_status()] != quadrotor.LANDING:
             rospy.loginfo('LANDING')
@@ -85,29 +83,22 @@ class Simulator(object):
             self._cmd_vel = LANDING_MSG
 
     def takeoff(self, dummy_arg):
-        """
-        Take Off Quadrotor
-        """
+        """Take Off Quadrotor"""
         if quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.LANDED:
             rospy.loginfo('TAKING_OFF')
             self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.TAKING_OFF))
             self._cmd_vel = TAKING_OFF_MSG
 
     def reset(self, dummy_arg):
-        """
-        Reset Quadrotor
-        """
+        """Reset Quadrotor"""
         self._quadrotor.set_status(quadrotor.STATUS.index(quadrotor.UNKOWN))
         rospy.loginfo('RESET')
 
     def cmd_vel(self, twist_msg):
-        """
-        Parse cmd_vel msg according to state or drone
-        """
+        """Parse cmd_vel msg according to state or drone"""
         vel = [twist_msg.linear.x, twist_msg.linear.y, twist_msg.linear.z,
                twist_msg.angular.x, twist_msg.angular.y, twist_msg.angular.z]
 
-        #vel = [SATURATION*v/abs(v) if abs(v) > SATURATION else v for v in vel]
         if quadrotor.STATUS[self._quadrotor.get_status()] == quadrotor.FLYING:
             self._cmd_vel = twist_msg
             if sum([x**2 for x in vel]) == 0:
@@ -137,9 +128,7 @@ class Simulator(object):
             self._physics.set_input(self._cmd_vel)
 
     def predict(self, time_event):
-        """
-        Update Quadrotor State
-        """
+        """Update Quadrotor State"""
         if time_event.last_real is not None:
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0:
@@ -163,13 +152,11 @@ class Simulator(object):
             self._quadrotor.set_omega(0., 0., 0.)
 
         if self._quadrotor.get_battery() < 20:
-            self.land()
+            self.land(None)
             rospy.loginfo('No more battery')
 
     def publish(self, time_event):
-        """
-        Publish messages
-        """
+        """Publish messages"""
         if time_event.last_real is not None:
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0:
@@ -181,9 +168,7 @@ class Simulator(object):
                 self._sequencer += 1
 
     def _update_sensors(self):
-        """
-        Update sensor measurements
-        """
+        """Update sensor measurements"""
         self._sensors['gyroscope'].set_true_value(self._quadrotor.get_velocity()[3:6])
         self._sensors['accelerometer'].set_orientation(self._quadrotor.get_quaternion())
         self._sensors['magnetometer'].set_orientation(self._quadrotor.get_quaternion())
@@ -193,17 +178,13 @@ class Simulator(object):
         self._sensors['velocity'].set_true_value(self._quadrotor.get_velocity()[0:2])
 
     def _stamp_msg(self, msg):
-        """
-        Get unstamped msg and return stamped msg
-        """
+        """Get unstamped msg and return stamped msg"""
         msg.header.stamp = rospy.Time.now()
         msg.header.seq = self._sequencer
         return msg
 
     def _publish_navdata(self):
-        """
-        Publish Navdata
-        """
+        """Publish Navdata"""
         orientation = tf.transformations.euler_from_quaternion(self._sensors['marg'].get_output())
         velocity = self._sensors['velocity'].get_output()
         altitude = self._sensors['altimeter'].get_output()
@@ -222,9 +203,7 @@ class Simulator(object):
         self._publishers['navdata'].publish(msg)
 
     def _publish_imu(self):
-        """
-        Publish IMU messages
-        """
+        """Publish IMU messages"""
         orientation = self._sensors['marg'].get_output()
         omega = self._sensors['gyroscope'].get_output()
         acceleration = self._sensors['accelerometer'].get_output()
@@ -247,9 +226,7 @@ class Simulator(object):
         self._publishers['imu'].publish(msg)
 
     def _publish_mag(self):
-        """
-        Publish Magnetometer messages
-        """
+        """Publish Magnetometer messages"""
         mag = self._sensors['magnetometer'].get_output()
 
         msg = self._stamp_msg(Vector3Stamped())
@@ -261,9 +238,7 @@ class Simulator(object):
         self._publishers['mag'].publish(msg)
 
     def _publish_fix(self, dummy_time):
-        """
-        Publish Fix Messages
-        """
+        """Publish Fix Messages"""
         gps = self._sensors['gps'].get_output()
 
         msg = self._stamp_msg(NavSatFix())
@@ -278,9 +253,7 @@ class Simulator(object):
         self._publishers['fix'].publish(msg)
 
     def _publish_altd(self):
-        """
-        Publish Altitude
-        """
+        """Publish Altitude"""
         altd = self._sensors['altimeter'].get_output()
         sensor_range = self._sensors['altimeter'].get_range()
 
@@ -292,9 +265,7 @@ class Simulator(object):
         self._publishers['sonar_height'].publish(msg)
 
     def _publish_true(self):
-        """
-        Publish True State
-        """
+        """Publish True State"""
         position = self._quadrotor.get_position()
         heading = self._quadrotor.get_heading()
         msg = self._stamp_msg(QuadrotorState())

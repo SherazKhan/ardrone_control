@@ -27,10 +27,7 @@ class SensorFusion(object):
         rospy.Timer(rospy.Duration(delta_t), self.predict)
 
     def recieve_navdata(self, navdata):
-        """
-        Callback from navdata from Ar.Drone
-        Reads state, battery percentage
-        """
+        """Callback from navdata from Ar.Drone: Reads state, battery percentage"""
         # convert to originally sent drone values (undo ardrone_autonomy changes)
         navdata.ax *= -1 # ax inverted
         navdata.az *= -1 # az inverted
@@ -43,19 +40,12 @@ class SensorFusion(object):
         #self.publish()
 
     def recieve_fix(self, fix):
-        """
-        Callback from gps
-        Reads latitude, longitude, altitude
-        Correct Prediction
-        """
+        """Callback from gps: Reads latitude, longitude, altitude. Correct Position"""
         pass
 
     def recieve_imu(self, imu_msg):
-        """
-        Callback from IMU
-        Reads gyroscope and accelerometer
-        Correct Pitch and Roll with Accelerometer
-        """
+        """Callback from IMU: Reads gyroscope and accelerometer.
+        Correct Pitch and Roll with Accelerometer"""
         self._quadrotor.set_omega(
             imu_msg.angular_velocity.x,
             imu_msg.angular_velocity.y,
@@ -63,18 +53,18 @@ class SensorFusion(object):
             )
 
     def recieve_mag(self, mag):
-        """
-        Callback from magnetometer
-        Reads magnetometer
-        Correct Magnetometer
-        """
+        """Callback from magnetometer: Reads magnetometer. Correct heading"""
         pass
 
+    def _stamp_msg(self, msg):
+        """Get unstamped msg and return stamped msg"""
+        msg.header.stamp = rospy.Time.now()
+        msg.header.seq = self._sequencer
+        return msg
+
     def publish(self):
-        """
-        Publish Quadrotor Position
-        """
-        msg = QuadrotorState()
+        """Publish Quadrotor Position"""
+        msg = self._stamp_msg(QuadrotorState())
         position = self._quadrotor.get_position()
         msg.x = position[0]
         msg.y = position[1]
@@ -82,16 +72,11 @@ class SensorFusion(object):
         msg.yaw = self._quadrotor.get_heading()
         msg.battery = self._quadrotor.get_battery()
         msg.status = self._quadrotor.get_status()
-        msg.header.stamp = rospy.Time.now()
-        msg.header.frame_id = self._quadrotor.get_name()
-        msg.header.seq = self._sequencer
+
         self._publisher.publish(msg)
 
     def predict(self, time_event):
-        """
-        Predict Quadrotor State
-        Timer Event Callback
-        """
+        """Predict Quadrotor State"""
         if time_event.last_real is not None:
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0:

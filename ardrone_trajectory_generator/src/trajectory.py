@@ -56,16 +56,12 @@ class WayPoints(object):
         return len(self._way_points)
 
     def get_way_point(self):
-        """
-        Return current way point
-        """
+        """Return current way point"""
         if len(self) > 0:
             return self._way_points[0]
 
     def get_position_error(self, quad_state_msg):
-        """
-        Get the position error in the estimation
-        """
+        """Get the position error in the estimation"""
         self._error = 0
         way_point = self.get_way_point()
         if way_point is not None:
@@ -102,6 +98,7 @@ class TrajectoryCommander(object):
         self._controlling = False
         self._joystick = joystick
         self._way_points = WayPoints(WAY_POINTS)
+        self._sequencer = 0
         delta_t = rospy.get_param('processing_time')
         self._publishers = {
             'land': rospy.Publisher('ardrone/land', Empty, queue_size=1),
@@ -119,54 +116,43 @@ class TrajectoryCommander(object):
         rospy.Timer(rospy.Duration(delta_t), self.command_reference)
 
     def land(self, dummy_arg=None):
-        """
-        Land Drone
-        """
+        """Land Drone"""
+        self.stop()
         self._publishers['land'].publish()
-        #rospy.loginfo('land')
 
     def takeoff(self, dummy_arg=None):
-        """
-        Land Drone
-        """
-        #print quadrotor.STATUS[self._reference.get_status()]
+        """Land Drone"""
         if quadrotor.STATUS[self._reference.get_status()] == quadrotor.LANDED:
+            self.stop()
             self._publishers['take_off'].publish()
-            #rospy.loginfo('take_off')
-        #else:
-            #rospy.logwarn('drone not landed')
 
     def stop(self):
-        """
-        Send Drone to Hover Mode
-        """
+        """Send Drone to Hover Mode"""
+        self.hover()
         self.control_off()
         self.command_vel(Twist())
-        #rospy.loginfo('Drone to Hover')
 
     def hover(self):
-        """
-        If the Drone is flying take it to hovering
-        """
+        """If the Drone is flying take it to hovering"""
         self._hover = True
 
     def no_hover(self):
-        """
-        If the Drone is flying don't let it hover
-        """
+        """If the Drone is flying don't let it hover"""
         self._hover = False
 
     def change_way_point(self):
-        """
-        Get the New Way Point
-        """
+        """Get the New Way Point"""
         self._way_points.pop(None)
 
+    def _stamp_msg(self, msg):
+        """Get unstamped msg and return stamped msg"""
+        msg.header.stamp = rospy.Time.now()
+        msg.header.seq = self._sequencer
+        return msg
+
     def command_reference(self, dummy_time_event):
-        """
-        Set the reference to the Position Feedback controller
-        """
-        msg = QuadrotorState()
+        """Set the reference to the Position Feedback controller"""
+        msg = self._stamp_msg(QuadrotorState())
         position = self._reference.get_position()
         msg.x = position[0]
         msg.y = position[1]
@@ -184,36 +170,28 @@ class TrajectoryCommander(object):
             self._reference.set_altitude(new_reference['z'])
             self._reference.set_heading(new_reference['yaw'])
 
+        self._sequencer += 1
+
     def command_vel(self, twist_msg):
-        """
-        Send Local velocity to Drone
-        """
+        """Send Local velocity to Drone"""
         self._publishers['cmd'].publish(twist_msg)
 
     def send_control(self):
-        """
-        Publish control on or control off
-        """
+        """Publish control on or control off"""
         self._publishers['closed_loop'].publish(self._controlling)
 
     def control_on(self):
-        """
-        Set Position Feedback Controller ON
-        """
+        """Set Position Feedback Controller ON"""
         self._controlling = True
         self.send_control()
 
     def control_off(self):
-        """
-        Set Position Feedback Controller ON
-        """
+        """Set Position Feedback Controller ON"""
         self._controlling = False
         self.send_control()
 
     def recieve_joystick(self, joy_msg):
-        """
-        Parse joystick message and run appropiate method
-        """
+        """Parse joystick message and run appropiate method"""
         idx = 0
         for is_pressed in getattr(joy_msg, 'buttons'):
             if is_pressed:
@@ -236,9 +214,7 @@ class TrajectoryCommander(object):
             self.command_vel(msg)
 
     def recieve_estimation(self, state_msg):
-        """
-        Recieve quadrotor estimated state
-        """
+        """Recieve quadrotor estimated state"""
         self._reference.set_status(state_msg.status)
         self._way_points.get_position_error(state_msg)
 
