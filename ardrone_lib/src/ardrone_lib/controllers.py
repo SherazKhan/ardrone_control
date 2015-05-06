@@ -23,12 +23,10 @@ class Controller(object):
     def set_reference(self, new_reference):
         """Set Controller reference"""
         self._reference = new_reference
-        self._calculate_error()
 
     def set_input(self, new_input):
         """Set Controller input"""
         self._input = new_input
-        self._calculate_error()
 
     def get_output(self):
         """Return Controller output"""
@@ -50,7 +48,7 @@ class Controller(object):
         """Set if position is periodic"""
         self._periodic = is_periodic
 
-    def _calculate_error(self):
+    def calculate_error(self):
         """calculate new error"""
         self._error = self._reference - self._input
         if self._periodic:
@@ -71,9 +69,9 @@ class PID(Controller):
         self._gains = numpy.array([Ki, Kp, Kd, Kd2])
         self._parallel_error = numpy.zeros((1, 4))[0]
 
-    def _calculate_error(self):
+    def calculate_error(self):
         """Calculate Controller Error"""
-        super(PID, self)._calculate_error()
+        super(PID, self).calculate_error()
         self._parallel_error[self.K_D] *= self.LAMBDA
         self._parallel_error[self.K_D] += (1-self.LAMBDA)\
                                          *(self._error - self._parallel_error[self.K_P])
@@ -102,7 +100,7 @@ class TrajectoryPID(PID):
     def _update_vector(self, vector, idx, new_value):
         """Updates vector values"""
         vector[idx] = new_value
-        self._calculate_error()
+        #self.calculate_error()
 
     def set_reference(self, position):
         """Set desired position"""
@@ -130,14 +128,13 @@ class TrajectoryPID(PID):
         """Set measured acceleration"""
         self._update_vector(self._trajectory_input, self.ACCELERATION, acceleration)
 
-    def _calculate_error(self):
+    def calculate_error(self):
         """Calculate Controller Error"""
         self._parallel_error[self.K_P:(self.K_D2+1)] =\
             self._trajectory_reference - self._trajectory_input
         if not self._saturated:
             self._parallel_error[self.K_I] += self._parallel_error[self.K_P]
         self._calculate_output()
-
 
 class Digital(Controller):
     """
@@ -154,11 +151,11 @@ class Digital(Controller):
     def __str__(self):
         return str(self._tf)
 
-    def _calculate_error(self):
+    def calculate_error(self):
         """Calculate Controller Error"""
-        super(Digital, self)._calculate_error()
-        self._tf.set_input(self._error)
+        super(Digital, self).calculate_error()
         self._calculate_output()
+        self._tf.set_input(self._error)
 
     def _calculate_output(self):
         """Calculate Controller output"""

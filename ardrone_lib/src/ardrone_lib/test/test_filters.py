@@ -30,17 +30,26 @@ class TestFilters(unittest.TestCase):
         time, output = scipy.signal.dstep((
             transfer_function.get_num(), transfer_function.get_den(), delta_t))
         for idx in range(len(time)):
-            self.assertAlmostEqual(output[0][idx], transfer_function.get_output())
             transfer_function.set_input(1.0)
+            self.assertAlmostEqual(output[0][idx][0], transfer_function.get_output())
+
     def test_transfer_function_impulse(self):
         """Test impulse response of transfer function"""
         delta_t = 0.01
         transfer_function = filters.TransferFunction([1.0], [1.0, 5.0], delta_t)
         time, output = scipy.signal.dimpulse((
             transfer_function.get_num(), transfer_function.get_den(), delta_t))
+
         for idx in range(len(time)):
-            self.assertAlmostEqual(output[0][idx], transfer_function.get_output())
             transfer_function.set_input(1.0 if idx == 0 else 0.0)
+            self.assertAlmostEqual(output[0][idx][0], transfer_function.get_output())
+        transfer_function = filters.TransferFunction([2., 9.7, 5.5], [1., 12.8, 25.], delta_t)
+        time, output = scipy.signal.dimpulse((
+            transfer_function.get_num(), transfer_function.get_den(), delta_t))
+        for idx in range(len(time)):
+            transfer_function.set_input(1.0 if idx == 0 else 0.0)
+            self.assertAlmostEqual(output[0][idx][-1], transfer_function.get_output())
+
     def test_leaky_integrator_lambda0(self):
         """test leaky integrator when lambda=0.0"""
         leaky = filters.LeakyIntegrator(0.)
@@ -64,14 +73,14 @@ class TestFilters(unittest.TestCase):
     def test_tf_with_delay(self):
         """test transfer function + delay"""
         tf_w_delay = filters.TransferFunctionWithDelay([1.0], [1.0, -0.095], 5)
-        t_f = filters.TransferFunction([1.0]+[0.]*5, [1.0, -0.095])
-
+        t_f = filters.TransferFunction(5*[0]+[1.0], [1.0, -0.095])
         for dummy_idx in range(100):
             tf_w_delay.set_input(1.0)
             t_f.set_input(1.0)
             self.assertAlmostEqual(tf_w_delay.get_output(), t_f.get_output())
 
 if __name__ == '__main__':
+    #unittest.main()
     import rostest
     PKG = 'test_ardrone_lib'
     rostest.rosrun(PKG, 'test_filters', TestFilters)

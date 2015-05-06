@@ -39,8 +39,8 @@ class TransferFunction(object):
             num, den = scipy.signal.ss2tf(a_k, b_k, c_k, d_k)
             num = num.reshape(-1,).tolist()
             den = den.reshape(-1,).tolist()
-        self._num = num
-        self._den = den
+        self._num = num[::-1]
+        self._den = den[::-1]
         self._input = deque([0]*len(num), maxlen=len(num))
         self._output = deque([0]*len(den), maxlen=len(den))
 
@@ -59,8 +59,8 @@ class TransferFunction(object):
         new_output = 0
         for idx in range(len(self._num)):
             new_output += self._num[idx] * self._input[idx]
-        for idx in range(1, len(self._den)):
-            new_output -= self._den[idx] * self._output[idx]
+        for idx in range(len(self._den)-1):
+            new_output -= self._den[idx] * self._output[1+idx]
         self._output.append(new_output)
 
     def get_output(self):
@@ -69,11 +69,11 @@ class TransferFunction(object):
 
     def get_num(self):
         """Return numerator"""
-        return self._num
+        return self._num[::-1]
 
     def get_den(self):
         """Return denominator"""
-        return self._den
+        return self._den[::-1]
 
 class TransferFunctionWithDelay(object):
     """
@@ -83,6 +83,7 @@ class TransferFunctionWithDelay(object):
         super(TransferFunctionWithDelay, self).__init__()
         self._transfer_function = TransferFunction(num, den, dt)
         self._delay = Delay(time_delays)
+
     def __str__(self):
         return str(self._transfer_function) +' '+ str(self._delay)
 

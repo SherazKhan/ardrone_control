@@ -15,9 +15,9 @@ class ArDrone(object):
         super(ArDrone, self).__init__()
         self._systems = {
             'x': filters.TransferFunctionWithDelay(
-                [6.154], [1., 0.665], delay/sim_time, sim_time),
+                [6.154 * MAX_EULER], [1., 0.665], delay/sim_time, sim_time),
             'y': filters.TransferFunctionWithDelay(
-                [4.774], [1., 0.4596], delay/sim_time, sim_time),
+                [4.774 * MAX_EULER], [1., 0.4596], delay/sim_time, sim_time),
             'z': filters.TransferFunctionWithDelay(
                 [0.1526, 5.153], [1.0, 5.82], delay/sim_time, sim_time),
             'yaw': filters.TransferFunctionWithDelay(
@@ -46,8 +46,8 @@ class ArDrone(object):
 
     def set_input(self, twist_msg):
         """Set new input"""
-        self._systems['x'].set_input(twist_msg.linear.x * MAX_EULER)
-        self._systems['y'].set_input(twist_msg.linear.y * MAX_EULER)
+        self._systems['x'].set_input(twist_msg.linear.x)
+        self._systems['y'].set_input(twist_msg.linear.y)
         self._systems['z'].set_input(twist_msg.linear.z * MAX_Z)
         self._systems['yaw'].set_input(twist_msg.angular.z)
 

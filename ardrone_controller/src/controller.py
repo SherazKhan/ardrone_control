@@ -18,13 +18,18 @@ class Controller(object):
     def __init__(self, name):
         super(Controller, self).__init__()
         self._estimation = quadrotor.Quadrotor(name)
-        self._reference = quadrotor.Quadrotor(name)
-        delta_t = rospy.get_param('processing_time')
+        delta_t = rospy.get_param('processing_time', 0.1)
         self._controllers = {
             'x': controllers.PID(0.1, 0., 0.05*delta_t),
             'y': controllers.PID(0.1, 0., 0.05*delta_t),
             'z': controllers.PID(1.0, 0., 0.0),
             'yaw': controllers.PID(0.8, 0., 0.2*delta_t)
+        }
+        self._controllers = {
+            'x': controllers.Digital([2., 9.7, 5.5], [1., 12.8, 25.], delta_t),
+            'y': controllers.Digital([0.1], [1.0]),
+            'z': controllers.Digital([1.03], [1.]),
+            'yaw': controllers.Digital([0.8], [1.])
         }
 
         # self._controllers = {
@@ -44,7 +49,7 @@ class Controller(object):
         rospy.Subscriber('ardrone/closed_loop', Bool, callback=self.recieve_closed_loop)
         rospy.Timer(rospy.Duration(delta_t), self.control)
 
-    def recieve_state_msg(self, quad_obj, msg, method):
+    def _recieve_state_msg(self, quad_obj, msg, method):
         """
         Updates quadrotor object when a QuadrotorState
         msg is recieved
@@ -61,14 +66,17 @@ class Controller(object):
         Recieve State Estimation from sensor fusion node
         Update Estimation locally
         """
-        self.recieve_state_msg(self._estimation, msg, 'set_input')
+        if self._controlling:
+            self._recieve_state_msg(self._estimation, msg, 'set_input')
+        self._estimation.set_status(msg.status)
 
     def recieve_reference(self, msg):
         """
         Recieve Reference from Trajectory Generator
         Update Reference locally
         """
-        self.recieve_state_msg(self._estimation, msg, 'set_reference')
+        if self._controlling:
+            self._recieve_state_msg(self._estimation, msg, 'set_reference')
 
     def recieve_closed_loop(self, msg_bool):
         """
@@ -86,6 +94,8 @@ class Controller(object):
         if time_event.last_real is not None:
             delta_t = float(time_event.current_real.nsecs - time_event.last_real.nsecs)/10**9
             if delta_t > 0 and self._controlling:
+                for controller in self._controllers.values():
+                    controller.calculate_error()
                 self.publish()
 
     def _check_saturation(self, msg):
@@ -94,20 +104,25 @@ class Controller(object):
         """
         if abs(msg.linear.x) > SATURATION:
             self._controllers['x'].set_saturated(True)
+            msg.linear.x = SATURATION if msg.linear.x > 0 else -SATURATION
         else:
             self._controllers['x'].set_saturated(False)
         if abs(msg.linear.y) > SATURATION:
             self._controllers['y'].set_saturated(True)
+            msg.linear.y = SATURATION if msg.linear.y > 0 else -SATURATION
         else:
             self._controllers['y'].set_saturated(False)
         if abs(msg.linear.z) > SATURATION:
             self._controllers['z'].set_saturated(True)
+            msg.linear.z = SATURATION if msg.linear.z > 0 else -SATURATION
         else:
             self._controllers['z'].set_saturated(False)
         if abs(msg.angular.z) > SATURATION:
             self._controllers['yaw'].set_saturated(True)
+            msg.angular.z = SATURATION if msg.angular.z > 0 else -SATURATION
         else:
             self._controllers['yaw'].set_saturated(False)
+        return msg
 
     def publish(self):
         """
@@ -123,8 +138,9 @@ class Controller(object):
         msg.linear.y = output[1]
         msg.linear.z = self._controllers['z'].get_output()
         msg.angular.z = self._controllers['yaw'].get_output()
+        msg = self._check_saturation(msg)
         self._publisher.publish(msg)
-        self._check_saturation(msg)
+
 
 
 if __name__ == '__main__':
