@@ -125,6 +125,10 @@ class TrajectoryCommander(object):
         if quadrotor.STATUS[self._reference.get_status()] == quadrotor.LANDED:
             self.stop()
             self._publishers['take_off'].publish()
+<<<<<<< HEAD
+=======
+
+>>>>>>> d6a07f116b889bcf6e392760628839627fe805af
 
     def stop(self):
         """Send Drone to Hover Mode"""
@@ -152,7 +156,11 @@ class TrajectoryCommander(object):
 
     def command_reference(self, dummy_time_event):
         """Set the reference to the Position Feedback controller"""
+<<<<<<< HEAD
         msg = self._stamp_msg(QuadrotorState())
+=======
+        msg = QuadrotorState()
+>>>>>>> d6a07f116b889bcf6e392760628839627fe805af
         position = self._reference.get_position()
         msg.x = position[0]
         msg.y = position[1]

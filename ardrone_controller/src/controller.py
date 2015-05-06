@@ -80,6 +80,7 @@ class Controller(object):
                     controller.calculate_error()
                 self.publish()
 
+<<<<<<< HEAD
     def _check_saturation(self):
         """Check if controller saturate and if so set them in saturation"""
         for controller in self._controllers.values():
@@ -87,6 +88,31 @@ class Controller(object):
                 controller.set_saturated(True)
             else:
                 controller.set_saturated(False)
+=======
+    def _check_saturation(self, msg):
+        """Check if controller saturate and if so set them in saturation"""
+        if abs(msg.linear.x) > SATURATION:
+            self._controllers['x'].set_saturated(True)
+            msg.linear.x = SATURATION if msg.linear.x > 0 else -SATURATION
+        else:
+            self._controllers['x'].set_saturated(False)
+        if abs(msg.linear.y) > SATURATION:
+            self._controllers['y'].set_saturated(True)
+            msg.linear.y = SATURATION if msg.linear.y > 0 else -SATURATION
+        else:
+            self._controllers['y'].set_saturated(False)
+        if abs(msg.linear.z) > SATURATION:
+            self._controllers['z'].set_saturated(True)
+            msg.linear.z = SATURATION if msg.linear.z > 0 else -SATURATION
+        else:
+            self._controllers['z'].set_saturated(False)
+        if abs(msg.angular.z) > SATURATION:
+            self._controllers['yaw'].set_saturated(True)
+            msg.angular.z = SATURATION if msg.angular.z > 0 else -SATURATION
+        else:
+            self._controllers['yaw'].set_saturated(False)
+        return msg
+>>>>>>> d6a07f116b889bcf6e392760628839627fe805af
 
     def publish(self):
         """Publish Twist Message"""
