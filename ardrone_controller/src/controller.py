@@ -19,25 +19,18 @@ class Controller(object):
         super(Controller, self).__init__()
         self._estimation = quadrotor.Quadrotor(name)
         delta_t = rospy.get_param('processing_time', 0.1)
-        self._controllers = {
-            'x': controllers.PID(0.1, 0., 0.05*delta_t),
-            'y': controllers.PID(0.1, 0., 0.05*delta_t),
-            'z': controllers.PID(1.0, 0., 0.0),
-            'yaw': controllers.PID(0.8, 0., 0.2*delta_t)
-        }
+        #self._controllers = {
+        #    'x': controllers.PID(0.1, 0., 0.05*delta_t),
+        #    'y': controllers.PID(0.1, 0., 0.05*delta_t),
+        #    'z': controllers.PID(1.0, 0., 0.0),
+        #    'yaw': controllers.PID(0.8, 0., 0.2*delta_t)
+        #}
         self._controllers = {
             'x': controllers.Digital([2., 9.7, 5.5], [1., 12.8, 25.], delta_t),
-            'y': controllers.Digital([0.1], [1.0]),
+            'y': controllers.Digital([3., 14., 5.6], [1., 12.5, 25.], delta_t),
             'z': controllers.Digital([1.03], [1.]),
-            'yaw': controllers.Digital([0.8], [1.])
+            'yaw': controllers.PID(0.8, 0., 0.2*delta_t)
         }
-
-        # self._controllers = {
-        #     'x': controllers.Digital([2., 9.7, 5.5], [1., 12.8, 25.], delta_t),
-        #     'y': controllers.Digital([3., 14., 5.6], [1., 12.5, 25.], delta_t),
-        #     'z': controllers.Digital([1.03], [1.]),
-        #     'yaw': controllers.Digital([0.8], [1.])
-        # }
 
         for controller in self._controllers.values():
             controller.set_saturated(False)
