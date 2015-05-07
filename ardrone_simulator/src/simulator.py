@@ -270,10 +270,10 @@ class Simulator(object):
         heading = self._quadrotor.get_heading()
         msg = self._stamp_msg(QuadrotorState())
 
-        msg.x = position[0]
-        msg.y = position[1]
-        msg.z = position[2]
-        msg.yaw = heading
+        msg.position.x = position[0]
+        msg.position.y = position[1]
+        msg.position.z = position[2]
+        msg.position.yaw = heading
         self._publishers['truth'].publish(msg)
 
 

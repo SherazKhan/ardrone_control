@@ -66,7 +66,7 @@ class WayPoints(object):
         way_point = self.get_way_point()
         if way_point is not None:
             for key, value in way_point.items():
-                self._error += abs(value - getattr(quad_state_msg, key))
+                self._error += abs(value - getattr(quad_state_msg.position, key))
         if self._error < THRESHOLD and not self._in_way_point:
             self._in_way_point = True
             self._timer = rospy.Timer(rospy.Duration(WAYPOINT_HOLD_TIME),
@@ -123,12 +123,8 @@ class TrajectoryCommander(object):
     def takeoff(self, dummy_arg=None):
         """Land Drone"""
         if quadrotor.STATUS[self._reference.get_status()] == quadrotor.LANDED:
-            self.stop()
+            self.control_off()
             self._publishers['take_off'].publish()
-<<<<<<< HEAD
-=======
-
->>>>>>> d6a07f116b889bcf6e392760628839627fe805af
 
     def stop(self):
         """Send Drone to Hover Mode"""
@@ -156,23 +152,20 @@ class TrajectoryCommander(object):
 
     def command_reference(self, dummy_time_event):
         """Set the reference to the Position Feedback controller"""
-<<<<<<< HEAD
         msg = self._stamp_msg(QuadrotorState())
-=======
-        msg = QuadrotorState()
->>>>>>> d6a07f116b889bcf6e392760628839627fe805af
         position = self._reference.get_position()
-        msg.x = position[0]
-        msg.y = position[1]
-        msg.z = position[2]
-        msg.yaw = self._reference.get_heading()
+        msg.position.x = position[0]
+        msg.position.y = position[1]
+        msg.position.z = position[2]
+        msg.position.yaw = self._reference.get_heading()
 
         self._publishers['reference'].publish(msg)
         new_reference = self._way_points.get_way_point()
         if new_reference is None:
-            self.control_off()
-            self.stop()
-            rospy.Timer(rospy.Duration(WAYPOINT_HOLD_TIME), self.land, oneshot=True)
+            if self._controlling:
+                self.control_off()
+                self.stop()
+                rospy.Timer(rospy.Duration(WAYPOINT_HOLD_TIME), self.land, oneshot=True)
         else:
             self._reference.set_position(new_reference['x'], new_reference['y'])
             self._reference.set_altitude(new_reference['z'])

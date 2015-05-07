@@ -66,10 +66,10 @@ class SensorFusion(object):
         """Publish Quadrotor Position"""
         msg = self._stamp_msg(QuadrotorState())
         position = self._quadrotor.get_position()
-        msg.x = position[0]
-        msg.y = position[1]
-        msg.z = position[2]
-        msg.yaw = self._quadrotor.get_heading()
+        msg.position.x = position[0]
+        msg.position.y = position[1]
+        msg.position.z = position[2]
+        msg.position.yaw = self._quadrotor.get_heading()
         msg.battery = self._quadrotor.get_battery()
         msg.status = self._quadrotor.get_status()
 
