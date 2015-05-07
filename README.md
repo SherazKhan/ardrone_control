@@ -104,4 +104,7 @@ To add your own module any module of the *.launch file can be commented
 - Add perturbations to the simulator
 - Add uncertainty to the simulator
 - Add a Chirp Service for Identification
+- Modularize Sensor Fusion Node
+- Modularize Trajectory Generator Node
+- Modularize Controller Node
 
