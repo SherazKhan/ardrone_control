@@ -1,0 +1,4 @@
+amplitude: 0.1
+f_initial: 0.01
+f_final: 2.0
+chirp_time: 10

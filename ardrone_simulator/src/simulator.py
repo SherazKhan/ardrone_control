@@ -165,6 +165,7 @@ class Simulator(object):
                 self._publish_imu()
                 self._publish_mag()
                 self._publish_altd()
+                self._publish_true()
                 self._sequencer += 1
 
     def _update_sensors(self):

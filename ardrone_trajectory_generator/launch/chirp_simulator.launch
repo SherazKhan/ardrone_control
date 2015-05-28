@@ -1,0 +1,14 @@
+<launch>
+	<!-- Load Filter parameters -->
+	<rosparam file="$(find ardrone_lib)/parameters/global_controller_params.yaml" command="load" />
+    <rosparam file="$(find ardrone_lib)/parameters/ideal_sensors.yaml" command="load" />
+    <rosparam file="$(find ardrone_lib)/parameters/sim_parameters.yaml" command="load" />
+    <rosparam file="$(find ardrone_trajectory_generator)/parameters/chirp.yaml" command="load" />
+
+    <node name="simulator" pkg="ardrone_simulator" type="simulator.py" respawn="false" output="screen" />
+    <node name="trajectory" pkg="ardrone_trajectory_generator" type="chirp.py" respawn="false" output="screen" />
+    <node name="joystick" pkg="joy" type="joy_node" respawn="false" output="screen" />
+
+    <node name="cmd_plotter" pkg="rqt_plot" type="rqt_plot" args="/cmd_vel/linear/x:y:z /cmd_vel/angular/z" respawn="false" output="screen" />
+    <node name="truth_plotter" pkg="rqt_plot" type="rqt_plot" args="/ardrone/ground_truth/position/x:y:z:yaw" respawn="false" output="screen" />
+</launch>
