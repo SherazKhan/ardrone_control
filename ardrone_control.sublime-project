@@ -1,0 +1,28 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+    "build_systems":
+    [
+        {
+            "path": "/home/sebascuri/catkin_ws/devel/bin:/opt/ros/indigo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin",
+            "name": "ROS python",
+            "cmd": ["python", "-u", "$file"],
+            "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+            "selector": "source.python",
+            "env":{
+                "PYTHONPATH":" /usr/lib/python2.7/dist-packages:/home/sebascuri/catkin_ws/devel/lib/python2.7/dist-packages/:/opt/ros/indigo/lib/python2.7/dist-packages",
+                },
+        }
+    ],
+    "settings":
+    {
+        "pylinter":
+        {
+            "pylint_rc": "/home/sebascuri/.pylintrc"
+        }
+    }
+}
