@@ -52,7 +52,9 @@ class SignalResponse(object):
             self._generate_chirp(axis,
                                  rospy.get_param('chirp_time'),
                                  rospy.get_param('f_initial'),
-                                 rospy.get_param('f_final'))
+                                 rospy.get_param('f_final'),
+                                 method=rospy.get_param('method'),
+                                 phi=rospy.get_param('phi'))
 
     def unset_axis(self, axis):
         """ unset chirp axis """
@@ -72,10 +74,11 @@ class SignalResponse(object):
                 else:
                     self.unset_axis(key)
 
-    def _generate_chirp(self, axis, chirp_time, f_initial, f_final):
+    def _generate_chirp(self, axis, chirp_time, f_initial, f_final, method='linear', phi=0):
         """generate chirp signal """
         time_array = numpy.linspace(0., chirp_time, num=numpy.floor(chirp_time/self._dt + 1))
-        self._output[axis] = scipy.signal.chirp(time_array, f_initial, chirp_time, f_final)
+        self._output[axis] = scipy.signal.chirp(time_array, f_initial, chirp_time, f_final,
+                                                method=method, phi=phi)
         self._output[axis] *= self._amplitude
 
 class TrajectoryCommander(object):
