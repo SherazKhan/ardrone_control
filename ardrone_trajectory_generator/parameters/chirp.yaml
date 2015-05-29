@@ -1,6 +1,7 @@
-amplitude: 1.0
+amplitude: -0.5
 f_initial: 0.01
 f_final: 2.0
 chirp_time: 10
 method: 'linear'
 phi: -90
+processing_time: 0.1
